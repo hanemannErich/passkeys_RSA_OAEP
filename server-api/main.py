@@ -3,7 +3,7 @@ from pydantic import BaseModel
 import base64
 from cryptography.hazmat.primitives.serialization import load_pem_public_key
 from cryptography.x509 import load_pem_x509_certificate
-from utils import verify_signature
+from utils import verify_signature, verify_alice_signature
 import cryptography.hazmat.primitives.serialization as serialization
 import os
 import cryptography.hazmat.backends as backends
@@ -74,6 +74,20 @@ def authenticate(username: str, signature: str, public_key: str, challenge: str)
             return {'message': 'authentication failed', 'detail': verification_result}
     else:
         return {'message': 'user not authenticated'}
+
+
+@app.post('/api/authenticate_alice')
+def authenticate_alice(username: str, signature: str, challenge: str):
+    user = check_username(username)
+    if user and user.challenge == challenge:
+        signature = base64.b64decode(signature)
+        verification_result_alice = verify_alice_signature(challenge, signature)
+        if verification_result_alice == 'Assinatura do cliente verificada com sucesso!':
+            return {'message': 'Alice authenticated'}
+        else:
+            return {'message': 'authentication failed', 'detail': verification_result_alice}
+    else:
+        return {'message': 'Alice not authenticated'}
 
 
 def generate_random_string(length):

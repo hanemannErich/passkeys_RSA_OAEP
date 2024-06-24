@@ -8,6 +8,7 @@ import cryptography.hazmat.primitives.hashes as hashes  # Import the hashes modu
 import hashlib
 import json
 import base64
+import time
 
 
 # Carrega as chaves privadas e públicas do cliente
@@ -60,6 +61,23 @@ def send_authentication_request(data: dict):
     response = requests.post('http://localhost:8000/api/authenticate', params=params, headers=headers)
     return response.json()
 
+def send_alice_authentication_request(data: dict):
+    # Envia uma requisição POST para o servidor
+    headers = {
+        'accept': 'application/json',
+        'content-type': 'application/x-www-form-urlencoded',
+    }
+
+    params = {
+        'username': data.get('username'),
+        'signature': data.get('signature'),
+        'challenge': data.get('challenge'),
+    }
+
+    response = requests.post('http://localhost:8000/api/authenticate_alice', params=params, headers=headers)
+    return response.json()
+
+
 def main():
     username = 'alice@email.com'
     print('Cliente iniciado!')
@@ -100,6 +118,21 @@ def main():
 
     response = send_authentication_request(data)
     print(response)
+
+    print('----------------------------------------------------------------------------')
+    print('\n\n Agora autenticando com o certificado da alice já no servidor\n\n')
+    print('----------------------------------------------------------------------------')
+    time.sleep(5)
+    data_alice = {
+        'username': username,
+        'signature': signature_base64,
+        'public_key': public_key_pem.decode('utf-8'),
+        'challenge': challenge
+    }
+
+    print('Enviando dados para teste com certificado de alice para o servidor:', data_alice)
+    response_alice = send_alice_authentication_request(data_alice)
+    print(response_alice)
 
 
 if __name__ == '__main__':

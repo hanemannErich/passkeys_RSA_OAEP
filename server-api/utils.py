@@ -6,7 +6,7 @@ from cryptography.x509 import load_pem_x509_certificate
 import cryptography.exceptions
 import hashlib
 
-def verify_signature(challenge, signature, public_key_pem):
+def verify_signature(challenge, signature, public_key_pem=None):
     # Carrega o certificado digital do servidor
     with open('server_cert.pem', 'rb') as f:
         certificate_pem = f.read()
@@ -15,9 +15,6 @@ def verify_signature(challenge, signature, public_key_pem):
         certificate_pem,
         backend=backends.default_backend()
     )
-
-    # Extrai a chave pública do servidor do certificado
-    public_key = certificate.public_key()
 
     # Recebe a assinatura e a chave pública do cliente
     data = {
@@ -33,6 +30,36 @@ def verify_signature(challenge, signature, public_key_pem):
 
     try:
         client_public_key.verify(
+            signature,
+            challenge.encode('utf-8'),
+            asymmetric.padding.PSS(
+                mgf=asymmetric.padding.MGF1(algorithm=hashes.SHA256()),
+                salt_length=asymmetric.padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
+        )
+        return 'Assinatura do cliente verificada com sucesso!'
+    except cryptography.exceptions.InvalidSignature:
+        return 'Assinatura do cliente inválida!'
+    except Exception as e:
+        return f'Erro ao verificar a assinatura do cliente: {e}'
+
+
+def verify_alice_signature(challenge, signature, public_key_pem=None):
+
+    with open('alice_cert.pem', 'rb') as f:
+        alice_certificate_pem = f.read()
+
+    alice_certificate = load_pem_x509_certificate(
+        alice_certificate_pem,
+        backend=backends.default_backend()
+    )
+
+    # Extrai a chave pública do certificado
+    alice_public_key = alice_certificate.public_key()
+
+    try:
+        alice_public_key.verify(
             signature,
             challenge.encode('utf-8'),
             asymmetric.padding.PSS(

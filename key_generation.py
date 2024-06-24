@@ -103,6 +103,9 @@ server_cert = x509.CertificateBuilder().subject_name(
 ).sign(server_key, hashes.SHA256())
 
 # Salva as chaves em arquivos PEM
+with open('server-api/alice_cert.pem', 'wb') as f:
+    f.write(alice_cert.public_bytes(Encoding.PEM))
+
 with open('server-api/server_private_key.pem', 'wb') as f:
     f.write(server_private_key_pem)
 
