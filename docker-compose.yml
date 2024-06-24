@@ -1,0 +1,22 @@
+version: '3.1'
+
+services:
+  client:
+    image: client
+    restart: 'no'
+    privileged: true
+    container_name: whisper-ctranslate2
+    environment:
+      - MODEL=tiny
+      - LANGUAGE=pt
+      - THREADS=6
+      - MODEL_SIZE=base
+    command: sleep 1238174916928372987
+      # - python3 main.py
+      # - sleep 1238174916928372987
+      # - whisper-ctranslate2 --live_transcribe True --language pt --model tiny --threads 6
+    # ports:
+    #   - "5000:5000"
+    volumes:
+      - C:\Users\erich\projects\general_faster_whisper:/root/whisper-ctranslate2/
+      - C:\Users\erich\projects\general_faster_whisper\containerdata\root\.cache\huggingface:/root/.cache/huggingface

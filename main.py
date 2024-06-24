@@ -62,7 +62,7 @@ def main():
     username = 'alice@email.com'
     print('Cliente iniciado!')
     print('para este teste, o servidor deve estar rodando em localhost:8000')
-    print('o nome de usuario e senha sao: alice@email.com, 1234')
+    print('o nome de usuario e senha sao: alice@email.com, 1234, e a chave publica de alice esta em alice_public_key.pem')
     print('enviando login request')
     response = send_login_request(username, '1234')
     # Recebe o desafio do servidor
