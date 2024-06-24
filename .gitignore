@@ -160,3 +160,11 @@ cython_debug/
 #  and can be added to the global gitignore or merged into this file.  For a more nuclear
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
+
+alice_cert.pem
+alice_private_key.pem
+alice_public_key.pem
+server-api/server_public_key.pem
+server-api/server_private_key.pem
+server-api/server_cert.pem
+server-api/alice_cert.pem
