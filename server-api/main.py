@@ -65,6 +65,7 @@ def send_message(username: str, password: str):
 def authenticate(username: str, signature: str, public_key: str, challenge: str):
     user = check_username(username)
     if user and user.challenge == challenge:
+        user.set_public_key(public_key)
         public_key = user.public_key
         verify_signature(challenge, signature, public_key)
         return {'message': 'user authenticated'}
@@ -72,22 +73,9 @@ def authenticate(username: str, signature: str, public_key: str, challenge: str)
         return {'message': 'user not authenticated'}
 
 
-
 def generate_random_string(length):
     letters = string.ascii_letters + string.digits
     return ''.join(random.choice(letters) for _ in range(length))
-
-
-def get_certificate():
-    with open('server_cert.pem', 'rb') as f:
-        certificate_pem = f.read()
-
-    certificate = serialization.load_certificate(
-        certificate_pem,
-        backend=backends.default_backend()
-    )
-    return certificate
-
 
 def check_username(username: str):
     for user in users.users:

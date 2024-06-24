@@ -1,7 +1,8 @@
 import requests
-import cryptography.hazmat.backends as backends
-import cryptography.hazmat.primitives.asymmetric as asymmetric
-from cryptography.hazmat.primitives.asymmetric import padding as assymetric_padding
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.backends import default_backend
 import cryptography.hazmat.primitives.serialization as serialization
 import cryptography.hazmat.primitives.hashes as hashes  # Import the hashes module
 import hashlib
@@ -14,7 +15,7 @@ with open('alice_private_key.pem', 'rb') as f:
 private_key = serialization.load_pem_private_key(
     private_key_pem,
     password=None,
-    backend=backends.default_backend()
+    backend=default_backend()
 )
 
 with open('alice_public_key.pem', 'rb') as f:
@@ -22,7 +23,7 @@ with open('alice_public_key.pem', 'rb') as f:
 
 public_key = serialization.load_pem_public_key(
     public_key_pem,
-    backend=backends.default_backend()
+    backend=default_backend()
 )
 
 
@@ -70,16 +71,16 @@ def main():
     challenge = input('Digite o desafio do servidor: ')
 
     # Specify the hash algorithm and optional label for OAEP padding
-    padding = assymetric_padding.OAEP(
-        mgf=assymetric_padding.MGF1(algorithm=hashes.SHA256()),
-        algorithm=hashes.SHA256(),
-        label=None  # Optional label (can be omitted)
+    padding_pss = padding.PSS(
+        mgf=padding.MGF1(hashes.SHA256()),
+        salt_length=padding.PSS.MAX_LENGTH
     )
 
     # Sign the challenge with the private key using OAEP padding
     signature = private_key.sign(
         challenge.encode('utf-8'),
-        padding=padding
+        padding_pss,
+        hashes.SHA256()
     )
 
     # Envia a assinatura e a chave pública do cliente para o servidor

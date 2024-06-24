@@ -1,15 +1,16 @@
 import cryptography.hazmat.backends as backends
 import cryptography.hazmat.primitives.asymmetric as asymmetric
 import cryptography.hazmat.primitives.serialization as serialization
+from cryptography.x509 import load_pem_x509_certificate
 import cryptography.exceptions
 import hashlib
 
 def verify_signature(challenge, signature, public_key_pem):
     # Carrega o certificado digital do servidor
-    with open('server_certificate.pem', 'rb') as f:
+    with open('server_cert.pem', 'rb') as f:
         certificate_pem = f.read()
 
-    certificate = serialization.load_certificate(
+    certificate = load_pem_x509_certificate(
         certificate_pem,
         backend=backends.default_backend()
     )
@@ -20,11 +21,11 @@ def verify_signature(challenge, signature, public_key_pem):
     # Recebe a assinatura e a chave pública do cliente
     data = {
         'signature': signature,
-        'public_key': public_key_pem.decode('utf-8')
+        'public_key': public_key_pem
     }
 
     # Carrega a chave pública do cliente
-    client_public_key = serialization.load_public_key(
+    client_public_key = serialization.load_pem_public_key(
         data['public_key'].encode('utf-8'),
         backend=backends.default_backend()
     )
@@ -40,5 +41,5 @@ def verify_signature(challenge, signature, public_key_pem):
             )
         )
         return('Assinatura do cliente verificada com sucesso!')
-    except cryptography.exceptions.VerificationFailure:
+    except Exception as e:
         return('Assinatura do cliente inválida!')
