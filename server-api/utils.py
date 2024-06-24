@@ -1,4 +1,5 @@
 import cryptography.hazmat.backends as backends
+from cryptography.hazmat.primitives import hashes
 import cryptography.hazmat.primitives.asymmetric as asymmetric
 import cryptography.hazmat.primitives.serialization as serialization
 from cryptography.x509 import load_pem_x509_certificate
@@ -30,16 +31,18 @@ def verify_signature(challenge, signature, public_key_pem):
         backend=backends.default_backend()
     )
 
-    # Verifica a assinatura do cliente
     try:
         client_public_key.verify(
-            data['signature'],
+            signature,
             challenge.encode('utf-8'),
-            algorithm=asymmetric.padding.OAEP(
-                mgf=asymmetric.padding.MGF1(algorithm=asymmetric.hashes.SHA256()),
-                hash_alg=asymmetric.hashes.SHA256()
-            )
+            asymmetric.padding.PSS(
+                mgf=asymmetric.padding.MGF1(algorithm=hashes.SHA256()),
+                salt_length=asymmetric.padding.PSS.MAX_LENGTH
+            ),
+            hashes.SHA256()
         )
-        return('Assinatura do cliente verificada com sucesso!')
+        return 'Assinatura do cliente verificada com sucesso!'
+    except cryptography.exceptions.InvalidSignature:
+        return 'Assinatura do cliente inválida!'
     except Exception as e:
-        return('Assinatura do cliente inválida!')
+        return f'Erro ao verificar a assinatura do cliente: {e}'

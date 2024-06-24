@@ -7,6 +7,8 @@ import cryptography.hazmat.primitives.serialization as serialization
 import cryptography.hazmat.primitives.hashes as hashes  # Import the hashes module
 import hashlib
 import json
+import base64
+
 
 # Carrega as chaves privadas e públicas do cliente
 with open('alice_private_key.pem', 'rb') as f:
@@ -82,11 +84,13 @@ def main():
         padding_pss,
         hashes.SHA256()
     )
+    signature_base64 = base64.b64encode(signature).decode('utf-8')
+
 
     # Envia a assinatura e a chave pública do cliente para o servidor
     data = {
         'username': username,
-        'signature': signature,
+        'signature': signature_base64,
         'public_key': public_key_pem.decode('utf-8'),
         'challenge': challenge
     }

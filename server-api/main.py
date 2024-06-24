@@ -66,9 +66,12 @@ def authenticate(username: str, signature: str, public_key: str, challenge: str)
     user = check_username(username)
     if user and user.challenge == challenge:
         user.set_public_key(public_key)
-        public_key = user.public_key
-        verify_signature(challenge, signature, public_key)
-        return {'message': 'user authenticated'}
+        signature = base64.b64decode(signature)
+        verification_result = verify_signature(challenge, signature, user.public_key)
+        if verification_result == 'Assinatura do cliente verificada com sucesso!':
+            return {'message': 'user authenticated'}
+        else:
+            return {'message': 'authentication failed', 'detail': verification_result}
     else:
         return {'message': 'user not authenticated'}
 
